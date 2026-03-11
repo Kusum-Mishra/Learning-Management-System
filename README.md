@@ -1,4 +1,5 @@
 # 🎓 Learning Management System (LMS)
+### (The project is still under development)
 
 ![LMS Header](https://img.shields.io/badge/Status-Active-brightgreen)
 ![License](https://img.shields.io/badge/License-MIT-blue)
