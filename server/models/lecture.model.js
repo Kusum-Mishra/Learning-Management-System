@@ -14,6 +14,6 @@ const lectureSchema = new mongoose.Schema({
     isPreviewFree:{
         type:Boolean
     }
-},{timestamp:true});
+},{timestamps:true});
 
 export const Lecture = mongoose.model("Lecture", lectureSchema);

@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/select"
 import { Loader2 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useEditCourseMutation, useGetCourseByIdQuery } from '@/features/api/courseApi';
+import { useEditCourseMutation, useGetCourseByIdQuery, usePublishCourseMutation } from '@/features/api/courseApi';
 import { toast } from 'sonner';
 
 const CourseTab = () => {
@@ -33,7 +33,9 @@ const CourseTab = () => {
     const courseId = params.courseId;
 
     //fetching the existing details of the course before editing and providing new details
-    const { data: courseByIdData, isLoading: courseByIdLoading } = useGetCourseByIdQuery(courseId, { refetchOnMountOrArgChange: true });
+    const { data: courseByIdData, isLoading: courseByIdLoading, refetch } = useGetCourseByIdQuery(courseId, { refetchOnMountOrArgChange: true });
+
+    const [publishCourse, {}] = usePublishCourseMutation();
 
     {/*useEffect(() => {
         if(courseByIdData?.course){
@@ -80,10 +82,10 @@ const CourseTab = () => {
 
     const selectCategory = (value) => {
         setInput({ ...input, category: value });
-    }
+    };
     const selectCourseLevel = (value) => {
         setInput({ ...input, courseLevel: value });
-    }
+    };
 
     //get file
     const selectThumbnail = (e) => {
@@ -109,6 +111,18 @@ const CourseTab = () => {
         await editCourse({ formData, courseId });
     }
 
+    const publishStatusHandler = async(action) => {
+        try{
+            const response = await publishCourse({courseId, query:action});
+            if(response.data){
+                refetch();
+                toast.success(response.data.message);
+            }
+        }catch(error){
+            toast.error("Failed to publish/unpublish course.")
+        }
+    }
+
     useEffect(() => {
         if (isSuccess) {
             toast.success(data?.message || "Course details updated.");
@@ -120,7 +134,6 @@ const CourseTab = () => {
 
     if (courseByIdLoading) return <Loader2 className='h-4 w-4 animate-spin' />
 
-    const isPublished = false;
 
     return (
         <Card>
@@ -132,9 +145,9 @@ const CourseTab = () => {
                     </CardDescription>
                 </div>
                 <div className='space-x-2'>
-                    <Button variant="outline">
+                    <Button disabled={courseByIdData?.course.lectures.length === 0} onClick={()=> publishStatusHandler(courseByIdData?.course.isPublished ? "false" : "true")} variant="outline">
                         {
-                            isPublished ? "Unpublished" : "Publish"
+                            courseByIdData?.course.isPublished ? "Unpublish" : "Publish"
                         }
                     </Button>
                     <Button>Remove Course</Button>
